@@ -9,6 +9,8 @@
 <canvas id="GameBoardCanvas" width="400px" height="400px" style="border: 2px solid;">
 </canvas>
 <div>Number of Moves: <p id="numMoves">0</p></div>
+<div>Total Paint (including duplicates): <p id="numPaint">0</p></div>
+<div>Time: <label id="minutes">00</label>:<label id="seconds">00</label></div>
 </body>
 <script
         src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -32,6 +34,27 @@
         y: 0
     };
     let numMoves = 0;
+    let numPaint = 0;
+
+    var minutesLabel = document.getElementById("minutes");
+    var secondsLabel = document.getElementById("seconds");
+    var totalSeconds = 0;
+    setInterval(setTime, 1000);
+
+    function setTime() {
+        ++totalSeconds;
+        secondsLabel.innerHTML = pad(totalSeconds % 60);
+        minutesLabel.innerHTML = pad(parseInt(totalSeconds / 60));
+    }
+
+    function pad(val) {
+        var valString = val + "";
+        if (valString.length < 2) {
+            return "0" + valString;
+        } else {
+            return valString;
+        }
+    }
 
     //Draw the game board
     function draw() {
@@ -81,6 +104,8 @@
         player.x += x;
         player.y += y;
         board[player.y][player.x] = 2;
+        numPaint++;
+        $("#numPaint").text(numPaint)
         if (canMove(player.x + x, player.y + y)) {
             setTimeout(() => {
                 moveInDirection(x, y);
@@ -105,6 +130,8 @@
         player.x = 0;
         player.y = 0;
         numMoves = 0;
+        numPaint = 0;
+        totalSeconds = 0;
         // if we got here we won
         for (let y = 0; y < board.length; y++) {
             for (let x = 0; x < board[y].length; x++) {
@@ -143,6 +170,7 @@
         board[player.y][player.x] = 2;
         draw();
         $("#numMoves").text(numMoves)
+        $("#numPaint").text(numPaint)
     });
 
     draw();
