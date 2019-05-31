@@ -23,10 +23,19 @@ The goal is to completely cover the board in paint.
 
 The game itself is trivial (and in fact I wish it was harder, perhaps a limitation on the number of moves, or the amount of paint you can lay down, or a timer). So trivial, in fact, that I recreated it in javascript to play around with it. I adapted some of the code from [here](http://jsfiddle.net/n8j1s/4y22135r/) and made it a little more functional and changed it to Amaze!!!.  
 
+
+## Goal
+
 I wanted to see how easy it would be to build an AI that would A) solve the puzzle and B) see if I could find a way to actually find the *optimal* solution. The latter seems significantly more difficult than the former.
 
 Note: After giving this some more thought I realized it's just a modification of the traveling salesman problem... What a bummer, to find out the problem you're trying to find an optimal solution to is NP hard. 
 
-Every move you make takes you to a new destination. You have to visit every node once (I *think*, still not completely sure; for instance, if a nodes nodes location is on the path of two other nodes, you don't need to visit that node, but you might have to visit that node to clear the blocks on that nodes path?).
+We can model our moves as a directed graph. You can't actually stop at every position on the board. You can make each valid ending point a node, and the outgoing four cardinal directions can be the edges to other valid ending nodes.
 
-We can model this as a directed graph, which you can see below
+It's still not clear to me if you *have* to visit every node, but you do have to visit (traverse over) every empty block. We might be able to abstract over this - since we know every level in the game is solvable, simply visiting all valid locations encompasses every valid path.
+
+If a nodes final location is on the path of two other nodes, you don't need to visit that node, but you might have to visit that node to clear the blocks on that nodes path?
+
+The graph for the first example is below:
+
+![graph](graph.png)

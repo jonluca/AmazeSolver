@@ -107,8 +107,10 @@ class AmazeGame:
         fig_size[0] = 12
         fig_size[1] = 9
         plt.rcParams["figure.figsize"] = fig_size
-        nx.draw_networkx(self.paths, pos=nx.spectral_layout(self.paths), with_labels=True)
-        plt.show()
+        nx.draw_networkx(self.paths, pos=nx.spring_layout(self.paths,k=0.7), with_labels=True)
+        plt.savefig('graph.png', dpi=300)
+
+    def save_cyto(self):
         cyto = convert2cytoscapeJSON(self.paths)
         with open('cyto.json', 'w') as out:
             out.write(cyto)
@@ -141,8 +143,8 @@ class AmazeGame:
             print('error')
 
     def solve(self):
-        solution = nx.edge_dfs(self.paths, self.nodes[12][0])
-        return list(solution)
+        sol = nx.minimum_spanning_arborescence(self.paths)
+        return sol
 
 
 def main():
@@ -156,7 +158,19 @@ def main():
                             [1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0], [1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
                             [2, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0]])
     amaze.generate_graph()
-    amaze.print_board()  # solution = amaze.solve()  # moveNum = 0  # for move in solution:  #     for letter in ('U', 'D', 'L', 'R'):  #         if move[0].dirs[letter] == move[1]:  #             print(f'Move number {moveNum}, move {letter}')  #             moveNum += 1  #             amaze.make_move(letter)  #             amaze.print_board()  #             break
+    amaze.print_board()
+
+    solution = amaze.solve()
+    print(solution)
+    # moveNum = 0
+    # for move in solution:
+    #     for letter in ('U', 'D', 'L', 'R'):
+    #         if move[0].dirs[letter] == move[1]:
+    #             print(f'Move number {moveNum}, move {letter}')
+    #             moveNum += 1
+    #             amaze.make_move(letter)
+    #             amaze.print_board()
+    #             break
 
 
 if __name__ == "__main__":
