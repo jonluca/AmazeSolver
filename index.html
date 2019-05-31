@@ -6,113 +6,145 @@
 </head>
 <body>
 <!--Code adapted from http://jsfiddle.net/n8j1s/4y22135r/-->
-<canvas id="GameBoardCanvas" width="400px" height="400px">
+<canvas id="GameBoardCanvas" width="400px" height="400px" style="border: 2px solid;">
 </canvas>
+<div>Number of Moves: <p id="numMoves">0</p></div>
 </body>
 <script
         src="https://code.jquery.com/jquery-3.4.1.min.js"
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
         crossorigin="anonymous"></script>
 <script>
-  const canvas = $('#GameBoardCanvas');
-  //The game board 0 = walls, 1 = path, -1 = start
-  const board = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1], [1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1],
-    [1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
-    [1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0], [1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
-    [1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0]
-  ];
-  const player = {
-    x: 0,
-    y: 0
-  };
+    const canvas = $('#GameBoardCanvas');
+    let isInMotion = false;
+    //The game board 0 = walls, 1 = path, -1 = start
+    const board = [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1], [1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1],
+        [1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
+        [1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0], [1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
+        [1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0]
+    ];
+    const player = {
+        x: 0,
+        y: 0
+    };
+    let numMoves = 0;
 
-  //Draw the game board
-  function draw() {
-    const width = canvas.width();
-    const blockSize = width / board.length;
-    const ctx = canvas[0].getContext('2d');
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, width, width);
-    ctx.fillStyle = "black";
-    //Loop through the board array drawing the walls and the goal
-    for (let y = 0; y < board.length; y++) {
-      for (let x = 0; x < board[y].length; x++) {
-        //Draw a wall
-        if (board[y][x] === 0) {
-          ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+    //Draw the game board
+    function draw() {
+        const width = canvas.width();
+        const blockSize = width / board.length;
+        const ctx = canvas[0].getContext('2d');
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, width, width);
+        ctx.fillStyle = "black";
+        //Loop through the board array drawing the walls and the goal
+        for (let y = 0; y < board.length; y++) {
+            for (let x = 0; x < board[y].length; x++) {
+                //Draw a wall
+                if (board[y][x] === 0) {
+                    ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+                }
+            }
         }
-      }
-    }
-    //Draw the player
-    ctx.beginPath();
+        //Draw the player
+        ctx.beginPath();
 
-    ctx.fillStyle = "#b598f1";
-    //Loop through the board array drawing the walls and the goal
-    for (let y = 0; y < board.length; y++) {
-      for (let x = 0; x < board[y].length; x++) {
-        //Draw a wall
-        if (board[y][x] === 2) {
-          ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+        ctx.fillStyle = "#b598f1";
+        //Loop through the board array drawing the walls and the goal
+        for (let y = 0; y < board.length; y++) {
+            for (let x = 0; x < board[y].length; x++) {
+                //Draw a wall
+                if (board[y][x] === 2) {
+                    ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+                }
+            }
         }
-      }
+        //Draw the player
+        ctx.beginPath();
+        const half = blockSize / 2;
+        ctx.fillStyle = "#715e97";
+        ctx.arc(player.x * blockSize + half, player.y * blockSize + half, half, 0, 2 * Math.PI);
+        ctx.fill();
     }
-    //Draw the player
-    ctx.beginPath();
-    const half = blockSize / 2;
-    ctx.fillStyle = "blue";
-    ctx.arc(player.x * blockSize + half, player.y * blockSize + half, half, 0, 2 * Math.PI);
-    ctx.fill();
-  }
 
-  //Check to see if the new space is inside the board and not a wall
-  function canMove(x, y) {
-    return (y >= 0) && (y < board.length) && (x >= 0) && (x < board[y].length) && (board[y][x] !== 0);
-  }
+    //Check to see if the new space is inside the board and not a wall
+    function canMove(x, y) {
+        return (y >= 0) && (y < board.length) && (x >= 0) && (x < board[y].length) && (board[y][x] !== 0);
+    }
 
-  function moveInDirection(x, y) {
-    board[player.y][player.x] = 2;
-    player.x += x;
-    player.y += y;
-    if (canMove(player.x + x, player.y + y)) {
-      setTimeout(() => {
-        moveInDirection(x, y);
+    function moveInDirection(x, y) {
+        isInMotion = true;
+        player.x += x;
+        player.y += y;
+        board[player.y][player.x] = 2;
+        if (canMove(player.x + x, player.y + y)) {
+            setTimeout(() => {
+                moveInDirection(x, y);
+                draw();
+            }, 10);
+        } else {
+            isInMotion = false;
+            checkWinState();
+        }
+    }
+
+    function checkWinState() {
+        for (let y = 0; y < board.length; y++) {
+            for (let x = 0; x < board[y].length; x++) {
+                //Draw a wall
+                if (board[y][x] === 1) {
+                    return;
+                }
+            }
+        }
+        alert('win');
+        player.x = 0;
+        player.y = 0;
+        numMoves = 0;
+        // if we got here we won
+        for (let y = 0; y < board.length; y++) {
+            for (let x = 0; x < board[y].length; x++) {
+                //Draw a wall
+                if (board[y][x] === 2) {
+                    board[y][x] = 1;
+                }
+            }
+        }
         draw();
-      }, 10);
-    } else {
-      checkWinState();
     }
-  }
 
-  function checkWinState() {
-    for (let y = 0; y < board.length; y++) {
-      for (let x = 0; x < board[y].length; x++) {
-        //Draw a wall
-        if (board[y][x] === 1) {
-          return;
+    $(document).keydown(function (e) {
+        if (isInMotion) {
+            return;
         }
-      }
-    }
-    alert("win!");
-  }
+        board[player.y][player.x] = 2;
 
-  $(document).keydown(function (e) {
-    if ((e.which === 38) && canMove(player.x, player.y - 1)) { //Up arrow
-      moveInDirection(0, -1);
-    } else if ((e.which === 40) && canMove(player.x, player.y + 1)) { // down arrow
-      moveInDirection(0, 1);
-    } else if ((e.which === 37) && canMove(player.x - 1, player.y)) {//left arrow
-      moveInDirection(-1, 0);
-    } else if ((e.which === 39) && canMove(player.x + 1, player.y)) {//right arrow
-      moveInDirection(1, 0);
-    }
-    board[player.y][player.x] = 2;
+        if ((e.which === 38) && canMove(player.x, player.y - 1)) { //Up arrow
+            moveInDirection(0, -1);
+            numMoves++;
+
+        } else if ((e.which === 40) && canMove(player.x, player.y + 1)) { // down arrow
+            moveInDirection(0, 1);
+            numMoves++;
+
+        } else if ((e.which === 37) && canMove(player.x - 1, player.y)) {//left arrow
+            moveInDirection(-1, 0);
+            numMoves++;
+
+        } else if ((e.which === 39) && canMove(player.x + 1, player.y)) {//right arrow
+            moveInDirection(1, 0);
+            numMoves++;
+
+        }
+        board[player.y][player.x] = 2;
+        draw();
+        $("#numMoves").text(numMoves)
+    });
+
     draw();
-  });
-
-  draw();
 </script>
 </html>
