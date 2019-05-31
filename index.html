@@ -15,7 +15,7 @@
         crossorigin="anonymous"></script>
 <script>
   const canvas = $('#GameBoardCanvas');
-  //The game board 1 = walls, 0 = free space, and -1 = the goal
+  //The game board 0 = walls, 1 = path, -1 = start
   const board = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
@@ -23,7 +23,7 @@
     [1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0],
     [1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0], [1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
-    [-1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0]
+    [1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0]
   ];
   const player = {
     x: 0,
@@ -74,9 +74,9 @@
   }
 
   function moveInDirection(x, y) {
+    board[player.y][player.x] = 2;
     player.x += x;
     player.y += y;
-    board[player.y][player.x] = 2;
     if (canMove(player.x + x, player.y + y)) {
       setTimeout(() => {
         moveInDirection(x, y);
@@ -96,7 +96,6 @@
         }
       }
     }
-
     alert("win!");
   }
 
