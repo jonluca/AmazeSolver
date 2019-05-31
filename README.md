@@ -23,4 +23,8 @@ The goal is to completely cover the board in paint.
 
 The game itself is trivial (and in fact I wish it was harder, perhaps a limitation on the number of moves, or the amount of paint you can lay down, or a timer). So trivial, in fact, that I recreated it in javascript to play around with it. I adapted some of the code from [here](http://jsfiddle.net/n8j1s/4y22135r/) and made it a little more functional and changed it to Amaze!!!.  
 
-I wanted to see how easy it would be to build an AI that would A) solve the puzzle and B) see if I could find a way to actually find the *optimal* solution. The latter seems significantly more difficult than the former. 
+I wanted to see how easy it would be to build an AI that would A) solve the puzzle and B) see if I could find a way to actually find the *optimal* solution. The latter seems significantly more difficult than the former.
+
+Note: After giving this some more thought I realized it's just a modification of the traveling salesman problem... What a bummer, to find out the problem you're trying to find an optimal solution to is NP hard. 
+
+Every move you make takes you to a new destination. You have to visit  

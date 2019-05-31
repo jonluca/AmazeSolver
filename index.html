@@ -5,12 +5,17 @@
     <title>Amaze!</title>
 </head>
 <body>
+<h1>Amaze!!! Clone</h1>
 <!--Code adapted from http://jsfiddle.net/n8j1s/4y22135r/-->
-<canvas id="GameBoardCanvas" width="400px" height="400px" style="border: 2px solid;">
+<canvas id="GameBoardCanvas" width="500px" height="500px" style="border: 2px solid;">
 </canvas>
 <div>Number of Moves: <p id="numMoves">0</p></div>
 <div>Total Paint (including duplicates): <p id="numPaint">0</p></div>
 <div>Time: <label id="minutes">00</label>:<label id="seconds">00</label></div>
+<div>
+    <label for="instructions">Instructions (U,D,L,R) one per line</label><textarea id="instructions"></textarea>
+    <button id="go">Submit</button>
+</div>
 </body>
 <script
         src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -31,15 +36,15 @@
     ];
     const player = {
         x: 0,
-        y: 0
+        y: 12
     };
     let numMoves = 0;
     let numPaint = 0;
 
-    var minutesLabel = document.getElementById("minutes");
-    var secondsLabel = document.getElementById("seconds");
-    var totalSeconds = 0;
-    setInterval(setTime, 1000);
+    const minutesLabel = document.getElementById("minutes");
+    const secondsLabel = document.getElementById("seconds");
+    let totalSeconds = 0;
+    let interval = setInterval(setTime, 1000);
 
     function setTime() {
         ++totalSeconds;
@@ -48,7 +53,7 @@
     }
 
     function pad(val) {
-        var valString = val + "";
+        const valString = val + "";
         if (valString.length < 2) {
             return "0" + valString;
         } else {
@@ -105,7 +110,7 @@
         player.y += y;
         board[player.y][player.x] = 2;
         numPaint++;
-        $("#numPaint").text(numPaint)
+        $("#numPaint").text(numPaint);
         if (canMove(player.x + x, player.y + y)) {
             setTimeout(() => {
                 moveInDirection(x, y);
@@ -127,11 +132,14 @@
             }
         }
         alert('win');
+        resetBoard();
+    }
+
+    function resetBoard() {
         player.x = 0;
-        player.y = 0;
+        player.y = 12;
         numMoves = 0;
         numPaint = 0;
-        totalSeconds = 0;
         // if we got here we won
         for (let y = 0; y < board.length; y++) {
             for (let x = 0; x < board[y].length; x++) {
@@ -141,6 +149,12 @@
                 }
             }
         }
+        $("#numMoves").text(numMoves);
+        $("#numPaint").text(numPaint);
+        clearInterval(interval);
+        totalSeconds = 0;
+        interval = setInterval(setTime, 1000);
+        setTime();
         draw();
     }
 
@@ -169,8 +183,43 @@
         }
         board[player.y][player.x] = 2;
         draw();
-        $("#numMoves").text(numMoves)
+        $("#numMoves").text(numMoves);
         $("#numPaint").text(numPaint)
+    });
+
+    $("#go").on('click', ev => {
+        const instructions = $("#instructions").val();
+        let arr = instructions.split('\n');
+
+        let interval = setInterval(() => {
+            if (isInMotion) {
+                return;
+            }
+            if (arr.length === 0) {
+                clearInterval(interval);
+                return;
+            }
+            const move = arr.shift();
+            switch (move) {
+                case 'U':
+                    if (canMove(player.x, player.y - 1))
+                        moveInDirection(0, -1);
+                    break;
+                case 'D':
+                    if (canMove(player.x, player.y + 1))
+
+                        moveInDirection(0, 1);
+                    break;
+                case 'R':
+                    if (canMove(player.x + 1, player.y))
+                        moveInDirection(1, 0);
+                    break;
+                case 'L':
+                    if (canMove(player.x - 1, player.y))
+                        moveInDirection(-1, 0);
+                    break;
+            }
+        }, 500)
     });
 
     draw();

@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from termcolor import colored
@@ -14,9 +13,6 @@ class AmazeGameLocation:
         self.index = index
         self.dirs = {'U': None, 'D': None, 'L': None, 'R': None, }
 
-    def __hash__(self):
-        return hash(tuple(np.array(self.index)))
-
     def __str__(self):
         return str(self.index)
 
@@ -29,9 +25,11 @@ class AmazeGame:
         self.nodes = np.empty((board_size, board_size), dtype=object)
         self.traversed = np.full((board_size, board_size), False)
         self.paths = nx.DiGraph()
+        self.ball = (0, 0)
 
     def generate_graph(self):
         ind = (12, 0)
+        self.ball = ind
         locs = [ind]
         while len(locs):
             next_loc = locs.pop()
@@ -44,14 +42,16 @@ class AmazeGame:
                 next_move_loc = add_tuples(move[1], next_loc)
                 if self.is_move_possible(next_move_loc):
                     next_attempt = add_tuples(move[1], next_move_loc)
+                    weight = 1
                     while self.is_move_possible(next_attempt):
                         next_move_loc = next_attempt
                         next_attempt = add_tuples(move[1], next_move_loc)
+                        weight += 1
                     if not self.nodes[next_move_loc]:
                         self.nodes[next_move_loc] = AmazeGameLocation(next_move_loc)
                         self.paths.add_node(self.nodes[next_move_loc])
                         locs.append(next_move_loc)
-                    self.paths.add_edge(self.nodes[next_loc], self.nodes[next_move_loc])
+                    self.paths.add_edge(self.nodes[next_loc], self.nodes[next_move_loc], weight=weight)
                     self.nodes[next_loc].dirs[move[0]] = self.nodes[next_move_loc]
 
     def print_board(self):
@@ -63,17 +63,45 @@ class AmazeGame:
                 if j == 1:
                     color = 'red'
                     letter = '.'
-                if j == 2:
+                elif j == 2:
                     color = 'blue'
                     letter = 'O'
+                elif j == 3:
+                    color = 'green'
+                    letter = 'Y'
                 printed += colored(letter, color)
             printed += '\n'
         print(printed)
-        nx.draw_networkx(self.paths, with_labels=True, font_weight='bold')
-        plt.show()
+        nx.draw_networkx(self.paths, with_labels=True, font_weight='bold')  # plt.show()
 
     def is_move_possible(self, move):
         return all(0 <= v < self.board_size for v in move) and self.board[move] == 1
+
+    def make_move(self, letter):
+        move = (0, 0)
+        if letter == 'U':
+            move = (-1, 0)
+        elif letter == 'D':
+            move = (1, 0)
+        elif letter == 'L':
+            move = (0, -1)
+        elif letter == 'R':
+            move = (0, 1)
+
+        self.board[self.ball] = 3
+        next_move_loc = add_tuples(self.ball, move)
+        if self.is_move_possible(next_move_loc):
+            self.ball = next_move_loc
+            self.board[self.ball] = 3
+            next_attempt = add_tuples(move, next_move_loc)
+            while self.is_move_possible(next_attempt):
+                self.ball = next_attempt
+                self.board[self.ball] = 3
+                next_attempt = add_tuples(move, next_move_loc)
+
+    def solve(self):
+        solution = nx.edge_dfs(self.paths, self.nodes[12][0])
+        return list(solution)
 
 
 def main():
@@ -88,6 +116,16 @@ def main():
                             [2, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0]])
     amaze.generate_graph()
     amaze.print_board()
+    solution = amaze.solve()
+    moveNum = 0
+    for move in solution:
+        for letter in ('U', 'D', 'L', 'R'):
+            if move[0].dirs[letter] == move[1]:
+                print(f'Move number {moveNum}, move {letter}')
+                moveNum += 1
+                amaze.make_move(letter)
+                amaze.print_board()
+                break
 
 
 if __name__ == "__main__":
