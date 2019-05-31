@@ -167,25 +167,28 @@
         if ((e.which === 38) && canMove(player.x, player.y - 1)) { //Up arrow
             moveInDirection(0, -1);
             numMoves++;
+            e.preventDefault();
 
         } else if ((e.which === 40) && canMove(player.x, player.y + 1)) { // down arrow
             moveInDirection(0, 1);
             numMoves++;
+            e.preventDefault();
 
         } else if ((e.which === 37) && canMove(player.x - 1, player.y)) {//left arrow
             moveInDirection(-1, 0);
             numMoves++;
+            e.preventDefault();
 
         } else if ((e.which === 39) && canMove(player.x + 1, player.y)) {//right arrow
             moveInDirection(1, 0);
             numMoves++;
+            e.preventDefault();
 
         }
         board[player.y][player.x] = 2;
         draw();
         $("#numMoves").text(numMoves);
         $("#numPaint").text(numPaint);
-        e.preventDefault();
     });
 
     $("#go").on('click', ev => {
@@ -200,6 +203,9 @@
                 clearInterval(interval);
                 return;
             }
+            numMoves++;
+            $("#numMoves").text(numMoves);
+            $("#numPaint").text(numPaint);
             const move = arr.shift();
             switch (move) {
                 case 'U':

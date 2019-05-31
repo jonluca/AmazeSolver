@@ -1,6 +1,5 @@
 import json
 
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from termcolor import colored
@@ -12,6 +11,7 @@ def add_tuples(a, b):
 
 def AGL_to_str(agl):
     return str(agl.index)
+
 
 # this function is used to convert networkx to Cytoscape.js JSON format
 # returns string of JSON
@@ -56,11 +56,13 @@ class AmazeGame:
         self.traversed = np.full((board_size, board_size), False)
         self.paths = nx.DiGraph()
         self.ball = (0, 0)
+        self.last_loc = None
 
     def generate_graph(self):
         ind = (12, 0)
         self.ball = ind
         locs = [ind]
+        next_loc = None
         while len(locs):
             next_loc = locs.pop()
             if not self.nodes[next_loc]:
@@ -83,6 +85,7 @@ class AmazeGame:
                         locs.append(next_move_loc)
                     self.paths.add_edge(self.nodes[next_loc], self.nodes[next_move_loc], weight=weight)
                     self.nodes[next_loc].dirs[move[0]] = self.nodes[next_move_loc]
+        self.last_loc = next_loc
 
     def print_board(self):
         printed = ''
@@ -102,12 +105,12 @@ class AmazeGame:
                 printed += colored(letter, color)
             printed += '\n'
         print(printed)
-        fig_size = plt.rcParams["figure.figsize"]
-        fig_size[0] = 12
-        fig_size[1] = 9
-        plt.rcParams["figure.figsize"] = fig_size
-        nx.draw_networkx(self.paths, pos=nx.spring_layout(self.paths,k=0.7), with_labels=True)
-        plt.savefig('graph.png', dpi=300)
+        # fig_size = plt.rcParams["figure.figsize"]
+        # fig_size[0] = 12
+        # fig_size[1] = 9
+        # plt.rcParams["figure.figsize"] = fig_size
+        # nx.draw_networkx(self.paths, pos=nx.spring_layout(self.paths, k=0.7), with_labels=True)
+        # plt.savefig('graph.png', dpi=300)
 
     def save_cyto(self):
         cyto = convert2cytoscapeJSON(self.paths)
@@ -141,9 +144,31 @@ class AmazeGame:
         else:
             print('error')
 
-    def solve(self):
-        sol = nx.minimum_spanning_arborescence(self.paths)
+    def solve_dfs(self):
+        nodes = self.paths.nodes()
+        sol = nx.shortest_path(self.paths, self.nodes[self.ball], self.nodes[self.last_loc])
+        nodes = [n for n in nodes if n not in sol]
+        while len(nodes):
+            sol += nx.shortest_path(self.paths, sol[-1], nodes[0])[1:]
+            nodes = [n for n in nodes if n not in sol]
         return sol
+
+
+def get_dfs_solution(amaze):
+    solution = amaze.solve_dfs()
+    move_num = 0
+    moves = []
+    for i in range(len(solution) - 1):
+        for letter in ('U', 'D', 'L', 'R'):
+            if solution[i].dirs[letter] == solution[i + 1]:
+                print(f'Move number {move_num}, move {letter}')
+                move_num += 1
+                moves.append(letter)
+                amaze.make_move(letter)
+                amaze.print_board()
+                break
+    for move in moves:
+        print(move)
 
 
 def main():
@@ -159,17 +184,7 @@ def main():
     amaze.generate_graph()
     amaze.print_board()
 
-    solution = amaze.solve()
-    print(solution)
-    # moveNum = 0
-    # for move in solution:
-    #     for letter in ('U', 'D', 'L', 'R'):
-    #         if move[0].dirs[letter] == move[1]:
-    #             print(f'Move number {moveNum}, move {letter}')
-    #             moveNum += 1
-    #             amaze.make_move(letter)
-    #             amaze.print_board()
-    #             break
+    get_dfs_solution(amaze)
 
 
 if __name__ == "__main__":
