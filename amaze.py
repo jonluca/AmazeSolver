@@ -13,7 +13,6 @@ def add_tuples(a, b):
 def AGL_to_str(agl):
     return str(agl.index)
 
-
 # this function is used to convert networkx to Cytoscape.js JSON format
 # returns string of JSON
 def convert2cytoscapeJSON(G):
