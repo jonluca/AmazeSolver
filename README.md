@@ -36,6 +36,6 @@ It's still not clear to me if you *have* to visit every node, but you do have to
 
 If a nodes final location is on the path of two other nodes, you don't need to visit that node, but you might have to visit that node to clear the blocks on that nodes path?
 
-The graph for the first example is below:
+The graph for the first example is below. The node names are the indices of the board on a 2D array. The board is 13x13, and the starting position is (12,0)
 
 ![graph](graph.png)
