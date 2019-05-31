@@ -27,4 +27,6 @@ I wanted to see how easy it would be to build an AI that would A) solve the puzz
 
 Note: After giving this some more thought I realized it's just a modification of the traveling salesman problem... What a bummer, to find out the problem you're trying to find an optimal solution to is NP hard. 
 
-Every move you make takes you to a new destination. You have to visit  
+Every move you make takes you to a new destination. You have to visit every node once (I *think*, still not completely sure; for instance, if a nodes nodes location is on the path of two other nodes, you don't need to visit that node, but you might have to visit that node to clear the blocks on that nodes path?).
+
+We can model this as a directed graph, which you can see below

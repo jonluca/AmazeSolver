@@ -184,7 +184,7 @@
         board[player.y][player.x] = 2;
         draw();
         $("#numMoves").text(numMoves);
-        $("#numPaint").text(numPaint)
+        $("#numPaint").text(numPaint);
     });
 
     $("#go").on('click', ev => {
@@ -202,21 +202,32 @@
             const move = arr.shift();
             switch (move) {
                 case 'U':
-                    if (canMove(player.x, player.y - 1))
+                    if (canMove(player.x, player.y - 1)) {
                         moveInDirection(0, -1);
+                    } else {
+                        console.log('error')
+                    }
                     break;
                 case 'D':
-                    if (canMove(player.x, player.y + 1))
-
+                    if (canMove(player.x, player.y + 1)) {
                         moveInDirection(0, 1);
+                    } else {
+                        console.log('error')
+                    }
                     break;
                 case 'R':
-                    if (canMove(player.x + 1, player.y))
+                    if (canMove(player.x + 1, player.y)) {
                         moveInDirection(1, 0);
+                    } else {
+                        console.log('error')
+                    }
                     break;
                 case 'L':
-                    if (canMove(player.x - 1, player.y))
+                    if (canMove(player.x - 1, player.y)) {
                         moveInDirection(-1, 0);
+                    } else {
+                        console.log('error')
+                    }
                     break;
             }
         }, 500)

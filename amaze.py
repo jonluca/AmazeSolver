@@ -1,3 +1,6 @@
+import json
+
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from termcolor import colored
@@ -5,6 +8,34 @@ from termcolor import colored
 
 def add_tuples(a, b):
     return tuple(p + q for p, q in zip(a, b))
+
+
+def AGL_to_str(agl):
+    return str(agl.index)
+
+
+# this function is used to convert networkx to Cytoscape.js JSON format
+# returns string of JSON
+def convert2cytoscapeJSON(G):
+    # load all nodes into nodes array
+    final = {}
+    final["nodes"] = []
+    final["edges"] = []
+    for node in G.nodes():
+        nx = {}
+        nx["data"] = {}
+        nx["data"]["id"] = str(node)
+        nx["data"]["label"] = str(node)
+        final["nodes"].append(nx.copy())
+    # load all edges to edges array
+    for edge in G.edges():
+        nx = {}
+        nx["data"] = {}
+        nx["data"]["id"] = str(edge[0]) + str(edge[1])
+        nx["data"]["source"] = str(edge[0])
+        nx["data"]["target"] = str(edge[1])
+        final["edges"].append(nx)
+    return json.dumps(final)
 
 
 class AmazeGameLocation:
@@ -72,10 +103,18 @@ class AmazeGame:
                 printed += colored(letter, color)
             printed += '\n'
         print(printed)
-        nx.draw_networkx(self.paths, with_labels=True, font_weight='bold')  # plt.show()
+        fig_size = plt.rcParams["figure.figsize"]
+        fig_size[0] = 12
+        fig_size[1] = 9
+        plt.rcParams["figure.figsize"] = fig_size
+        nx.draw_networkx(self.paths, pos=nx.spectral_layout(self.paths), with_labels=True)
+        plt.show()
+        cyto = convert2cytoscapeJSON(self.paths)
+        with open('cyto.json', 'w') as out:
+            out.write(cyto)
 
     def is_move_possible(self, move):
-        return all(0 <= v < self.board_size for v in move) and self.board[move] == 1
+        return all(0 <= v < self.board_size for v in move) and self.board[move] != 0
 
     def make_move(self, letter):
         move = (0, 0)
@@ -97,7 +136,9 @@ class AmazeGame:
             while self.is_move_possible(next_attempt):
                 self.ball = next_attempt
                 self.board[self.ball] = 3
-                next_attempt = add_tuples(move, next_move_loc)
+                next_attempt = add_tuples(move, next_attempt)
+        else:
+            print('error')
 
     def solve(self):
         solution = nx.edge_dfs(self.paths, self.nodes[12][0])
@@ -115,17 +156,7 @@ def main():
                             [1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0], [1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
                             [2, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0]])
     amaze.generate_graph()
-    amaze.print_board()
-    solution = amaze.solve()
-    moveNum = 0
-    for move in solution:
-        for letter in ('U', 'D', 'L', 'R'):
-            if move[0].dirs[letter] == move[1]:
-                print(f'Move number {moveNum}, move {letter}')
-                moveNum += 1
-                amaze.make_move(letter)
-                amaze.print_board()
-                break
+    amaze.print_board()  # solution = amaze.solve()  # moveNum = 0  # for move in solution:  #     for letter in ('U', 'D', 'L', 'R'):  #         if move[0].dirs[letter] == move[1]:  #             print(f'Move number {moveNum}, move {letter}')  #             moveNum += 1  #             amaze.make_move(letter)  #             amaze.print_board()  #             break
 
 
 if __name__ == "__main__":
