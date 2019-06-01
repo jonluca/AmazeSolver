@@ -136,20 +136,23 @@ class AmazeGame:
         if self.is_move_possible(next_move_loc):
             self.ball = next_move_loc
             self.board[self.ball] = 3
+            self.traversed[self.ball] = True
             next_attempt = add_tuples(move, next_move_loc)
             while self.is_move_possible(next_attempt):
                 self.ball = next_attempt
                 self.board[self.ball] = 3
+                self.traversed[self.ball] = True
                 next_attempt = add_tuples(move, next_attempt)
         else:
             print('error')
+        self.board[self.ball] = 2
 
     def solve_dfs(self):
         nodes = self.paths.nodes()
-        sol = nx.shortest_path(self.paths, self.nodes[self.ball], self.nodes[self.last_loc])
+        sol = nx.dijkstra_path(self.paths, self.nodes[self.ball], self.nodes[self.last_loc])
         nodes = [n for n in nodes if n not in sol]
         while len(nodes):
-            sol += nx.shortest_path(self.paths, sol[-1], nodes[0])[1:]
+            sol += nx.dijkstra_path(self.paths, sol[-1], nodes[0])[1:]
             nodes = [n for n in nodes if n not in sol]
         return sol
 
